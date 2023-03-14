@@ -1,45 +1,75 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ModalOverlay, ModalBody, ModalImg } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
-    componentDidMount() {
-        window.addEventListener('keydown', this.onKeyDown);
-    }
+export const Modal = ({ toggleModal, image, tags }) => {
+    useEffect(() => {
+        const onKeyDown = e => {
+            if (e.code !== 'Escape') {
+                return;
+            }
+            toggleModal();
+        };
 
-    componentWillUnmount() {
-        window.removeEventListener('keydown', this.onKeyDown);
-    }
+        window.addEventListener('keydown', onKeyDown);
 
-    onKeyDown = e => {
-        if (e.code !== 'Escape') {
-            return;
-        }
-        this.props.toggleModal();
-    };
+        return () => window.removeEventListener('keydown', this.onKeyDown);
+    }, [toggleModal]);
 
-    overlayClick = e => {
+    const overlayClick = e => {
         if (e.target === e.currentTarget) {
-            this.props.toggleModal();
+            toggleModal();
         }
     };
 
-    render() {
-        const { image, tags } = this.props;
+    return createPortal(
+        <ModalOverlay onClick={overlayClick}>
+            <ModalBody>
+                <ModalImg src={image} alt={tags} />
+            </ModalBody>
+        </ModalOverlay>,
+        modalRoot
+    );
+};
 
-        return createPortal(
-            <ModalOverlay onClick={this.overlayClick}>
-                <ModalBody>
-                    <ModalImg src={image} alt={tags} />
-                </ModalBody>
-            </ModalOverlay>,
-            modalRoot
-        );
-    }
-}
+// export class Modal extends Component {
+//     componentDidMount() {
+//         window.addEventListener('keydown', this.onKeyDown);
+//     }
+
+//     componentWillUnmount() {
+//         window.removeEventListener('keydown', this.onKeyDown);
+//     }
+
+//     onKeyDown = e => {
+//         if (e.code !== 'Escape') {
+//             return;
+//         }
+//         this.props.toggleModal();
+//     };
+
+//     overlayClick = e => {
+//         if (e.target === e.currentTarget) {
+//             this.props.toggleModal();
+//         }
+//     };
+
+//     render() {
+//         const { image, tags } = this.props;
+
+//         return createPortal(
+//             <ModalOverlay onClick={this.overlayClick}>
+//                 <ModalBody>
+//                     <ModalImg src={image} alt={tags} />
+//                 </ModalBody>
+//             </ModalOverlay>,
+//             modalRoot
+//         );
+//     }
+// }
 
 Modal.propTypes = {
     toggleModal: PropTypes.func,
